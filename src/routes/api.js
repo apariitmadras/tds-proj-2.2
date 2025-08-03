@@ -3,6 +3,8 @@ const router = express.Router();
 const wikipediaAnalyzer = require('../src/analyzers/wikipediaAnalyzer');
 const courtDataAnalyzer = require('../src/analyzers/courtDataAnalyzer');
 const genericAnalyzer = require('../src/analyzers/genericAnalyzer');
+const customAnalyzer = require('./src/analyzers/customAnalyzer');
+
 
 // Middleware to parse text body
 router.use(express.text({ limit: '10mb' }));
