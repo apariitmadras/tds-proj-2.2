@@ -13,6 +13,7 @@ const PORT = process.env.PORT || 3000;
 const wikipediaAnalyzer = require('./src/analyzers/wikipediaAnalyzer');
 const courtDataAnalyzer = require('./src/analyzers/courtDataAnalyzer');
 const genericAnalyzer = require('./src/analyzers/genericAnalyzer');
+const customAnalyzer = require('./src/analyzers/customAnalyzer');
 
 // Middleware
 app.use(cors({
@@ -37,38 +38,26 @@ app.get('/health', (req, res) => {
 
 // Main API endpoint
 app.post('/api/analyze', async (req, res) => {
-    try {
-        const { question } = req.body;
-        
-        if (!question || typeof question !== 'string') {
-            return res.status(400).json({ 
-                error: 'Question is required and must be a string' 
-            });
-        }
+  const { question } = req.body;
+  try {
+    let result;
 
-        console.log('Processing question:', question);
-
-        let result;
-        const lowerQuestion = question.toLowerCase();
-
-        // Route to appropriate analyzer
-        if (lowerQuestion.includes('wikipedia') || lowerQuestion.includes('scrape')) {
-            result = await wikipediaAnalyzer.analyze(question);
-        } else if (lowerQuestion.includes('court') || lowerQuestion.includes('judgment')) {
-            result = await courtDataAnalyzer.analyze(question);
-        } else {
-            result = await genericAnalyzer.analyze(question);
-        }
-
-        res.json(result);
-        
-    } catch (error) {
-        console.error('Analysis error:', error);
-        res.status(500).json({ 
-            error: 'Internal server error',
-            message: error.message 
-        });
+    if (question.includes('List of highest grossing films')) {
+      result = await wikipediaAnalyzer.analyze(question);
     }
+
+    else if (question.match(/regress\s+\w+\s+vs\s+\w+\s+from/i)) {
+      result = await myCustomAnalyzer.analyze(question);
+    }
+
+    else {
+      result = await genericAnalyzer.analyze(question);
+    }
+
+    res.status(200).json(result);
+  } catch (err) {
+    res.status(500).json({ error: "Internal server error", message: err.message });
+  }
 });
 
 // Catch all route - serve index.html for SPA
